@@ -13,6 +13,9 @@ import (
 	"encoding/gob"
 	"github.com/hefju/RoadtotheGods/tool"
 	"sort"
+	"bytes"
+	"compress/zlib"
+	"io"
 )
 
 type sortelem struct {
@@ -25,6 +28,10 @@ type sortelem struct {
 //func (f sortelem) Len() int           { return len(f) }
 //func (f sortelem) Less(i, j int) bool { return f[i].size < f[j].size }
 //func (f sortelem) Swap(i, j int)      { f[i], f[j] = f[j], f[i] }
+
+//http://liyangliang.me/posts/2014/06/sort-in-golang/
+//http://lib.csdn.net/article/go/43313?knId=1443
+//http://stackoverflow.com/questions/23330781/sort-golang-map-values-by-keys
 
 //var wg sync.WaitGroup
 func Solve1231(srcpath string){
@@ -139,4 +146,31 @@ func FindFiles(rootpath string,countName string){
 	if err!=nil{
 		fmt.Println(err)
 	}
+}
+
+func gobEncode(object interface{})[]byte{
+	buf :=new(bytes.Buffer)
+
+	enc:=gob.NewEncoder(buf)
+	err:=enc.Encode(object)
+	if err!=nil{
+		fmt.Println(err)
+	}
+	return  buf.Bytes()
+}
+
+//进行zlib解压缩
+func ZlibUnCompress(compressSrc []byte) []byte {
+	var out bytes.Buffer
+	r, _ := zlib.NewReader(bytes.NewReader(compressSrc))
+	io.Copy(&out, r)
+	return out.Bytes()
+}
+//进行zlib压缩
+func ZlibCompress(src []byte) []byte {
+	var in bytes.Buffer
+	w := zlib.NewWriter(&in)
+	w.Write(src)
+	w.Close()
+	return in.Bytes()
 }
